@@ -64,10 +64,12 @@ Group Members -
 
             var myGamePiece;
             var myBlocks = [];
+
             var stopBlocks = [];
             var newBlock = false;
             var firstBlock = true;
             var blockList = [];
+
             var level = new Array(12);
             for (i = 0; i < 12; i++) {
                 level[i] = new Array(9);
@@ -78,8 +80,13 @@ Group Members -
             var cnt = new Array(12);
             for (i = 0; i < 12; i++)
                 cnt[i] = 0;
+
             var left = false;
             var right = false;
+
+            var stop = false;
+            var stop_cnt = 0;
+
             function startGame() {
                 myGameArea.start();
             }
@@ -168,63 +175,69 @@ Group Members -
                     right = true;
                 }
 
-                //@shree - game complete, blocks hit the top
-                for (var i = 0; i < 9; i++) {
-                    if (level[11][i] >= 0)
-                        window.alert("Stop");
-                }
-
 
                 //@shree - updating the blocks continuously
-                for (var i = 0; i < myBlocks.length; i += 1) {
+                for (var i = 0; ((i < myBlocks.length) || !stop); i++) {
 
-                    //@shree - if block is not yet in the stopped list, add it to stopped list and set values for the next block, if not move current block downwards
-                    //@shree - if block is first block, and reaches bottom border, add to stopped list
+                    if (stop) {
+                        //window.alert("Game Over!! Reload page to start again.");
+                        newBlock = false
+                        
+                        //@shree - keep rendering all the blocks again
+                        myBlocks[i].update();;
+                    } else {
 
-                    if ((myBlocks[i].y === 220 && !stopBlocks.includes(i)) || (myBlocks[i].y === 220 && firstBlock)) {
-                        stopBlocks.push(i);
-                        level[0][cnt[0]] = i;
-                        cnt[0]++;
-                        newBlock = true;
-                        firstBlock = false;
-                    }                                                                                           //@shree - if block is not stopped yet, then keep it in motion 
-                    else if (!stopBlocks.includes(i)) {
+                        //@shree - if block is not yet in the stopped list, add it to stopped list and set values for the next block, if not move current block downwards
+                        //@shree - if block is first block, and reaches bottom border, add to stopped list
 
-                        //@shree - move down, check obstacles
-                        if ((myBlocks[i].y % 20) === 0) {
+                        if ((myBlocks[i].y === 220 && !stopBlocks.includes(i)) || (myBlocks[i].y === 220 && firstBlock)) {
+                            stopBlocks.push(i);
+                            level[0][cnt[0]] = i;
+                            cnt[0]++;
+                            newBlock = true;
+                            firstBlock = false;
+                        }                                                                                           //@shree - if block is not stopped yet, then keep it in motion 
+                        else if (!stopBlocks.includes(i)) {
 
-                            if (allowDown(myBlocks[i].x, myBlocks[i].y, i))
-                            {
-                                //@shree - obstacle found, adding this block to stoplist raise new block
-                                stopBlocks.push(i);
-                                level[Math.abs((myBlocks[i].y / 20) - 11)][cnt[Math.abs((myBlocks[i].y / 20) - 11)]] = i;
-                                cnt[Math.abs((myBlocks[i].y / 20) - 11)]++;
-                                newBlock = true;
-                            } else
+                            //@shree - move down, check obstacles
+                            if ((myBlocks[i].y % 20) === 0) {
+
+                                if (allowDown(myBlocks[i].x, myBlocks[i].y, i))
+                                {
+                                    //@shree - obstacle found, adding this block to stoplist raise new block
+                                    stopBlocks.push(i);
+                                    level[Math.abs((myBlocks[i].y / 20) - 11)][cnt[Math.abs((myBlocks[i].y / 20) - 11)]] = i;
+                                    cnt[Math.abs((myBlocks[i].y / 20) - 11)]++;
+
+                                    if (Math.abs((myBlocks[i].y / 20) - 11) === 11)
+                                        stop = true;
+
+                                    newBlock = true;
+                                } else
+                                    myBlocks[i].y += 1;
+                            } else {
                                 myBlocks[i].y += 1;
-                        } else {
-                            myBlocks[i].y += 1;
+                            }
+
+                            //@shree - move left
+                            if (left) {
+                                if (!(myBlocks[i].x === 0))                                                    //@shree - check for left border
+                                    myBlocks[i].x -= 20;
+                                left = false;
+                            }
+
+                            //@shree - move right
+                            if (right) {
+                                if (!((myBlocks[i].x + (blockList[i] * 20)) === 180))                      //@shree - check for the right border
+                                    myBlocks[i].x += 20;
+                                right = false;
+                            }
                         }
 
-                        //@shree - move left
-                        if (left) {
-                            if (!(myBlocks[i].x === 0))                                                    //@shree - check for left border
-                                myBlocks[i].x -= 20;
-                            left = false;
-                        }
-
-                        //@shree - move right
-                        if (right) {
-                            if (!((myBlocks[i].x + (blockList[i] * 20)) === 180))                      //@shree - check for the right border
-                                myBlocks[i].x += 20;
-                            right = false;
-                        }
+                        //@shree - render all the blocks again
+                        myBlocks[i].update();
                     }
-
-                    //@shree - render all the blocks again
-                    myBlocks[i].update();
                 }
-
             }
 
             //@shree - allow block to move down, or is it hit by obstacle
