@@ -6,10 +6,12 @@
 CS571 (Spring 2018) : Assignment 3 - Tetris Game
 
 Group Members - 
-    1. Shriram Suryawanshi [B00734421]
-    2. Vinen Furtado 
+    1. Shriram Suryawanshi [ssuryaw1@binghamton.edu]
+    2. Vinen Furtado  [vfurtad1@binghamton.edu]
 
 -->
+
+
 
 <html>
     <head>
@@ -49,6 +51,7 @@ Group Members -
     </head>
 
 
+
     <body onload = startGame()>
 
         <div align = "center">
@@ -77,6 +80,7 @@ Group Members -
             var newBlock = false;
             var firstBlock = true;
             var blockList = [];
+
             var level = new Array(12);
             for (i = 0; i < 12; i++) {
                 level[i] = new Array(9);
@@ -87,10 +91,13 @@ Group Members -
             var cnt = new Array(12);
             for (i = 0; i < 12; i++)
                 cnt[i] = 0;
+
             var left = false;
             var right = false;
             var stop = false;
             var alertmsg = false;
+
+
             function startGame() {
                 myGameArea.start();
             }
@@ -106,6 +113,7 @@ Group Members -
                     document.body.insertBefore(this.canvas, document.body.childNodes[0]);
                     this.frameNo = 0;
                     this.interval = setInterval(updateGameArea, 20);
+
                     window.addEventListener('keydown', function (e) {
                         myGameArea.key = e.keyCode;
                     })
@@ -114,21 +122,24 @@ Group Members -
                         myGameArea.key = false;
                     })
                 },
+
                 clear: function () {
                     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
                 },
+
                 stop: function () {
                     clearInterval(this.interval);
                 }
             }
 
 
-
             function component(width, height, color, x, y) {
+
                 this.width = width;
                 this.height = height;
                 this.x = x;
                 this.y = y;
+
                 this.update = function () {
                     ctx = myGameArea.context;
                     ctx.fillStyle = color;
@@ -144,18 +155,22 @@ Group Members -
 
 
             function updateGameArea() {
+
                 var y, n, pos;
                 myGameArea.clear();
                 myGameArea.frameNo += 1;
+
                 //@shree - create a new block at start or when last block is stopped
                 if (myGameArea.frameNo === 1 || newBlock) {
 
                     //@shree - creating one of the 4 blocks randomly
                     n = Math.floor(Math.random() * 4) + 1;
                     max = 180 - (n * 20);
+
                     //@shree - setting start point randomly (multiple of 20 so easy to handle left right operation
                     pos = Math.floor(Math.random() * max);
                     pos = pos - (pos % 20);
+
                     if (n === 1)
                         myBlocks.push(new component(20, 20, "red", pos, 0));
                     else if (n === 2)
@@ -164,6 +179,7 @@ Group Members -
                         myBlocks.push(new component(60, 20, "red", pos, 0));
                     else if (n === 4)
                         myBlocks.push(new component(80, 20, "red", pos, 0));
+
                     blockList.push(n);
                     newBlock = false;
                 }
@@ -179,8 +195,6 @@ Group Members -
                     myGameArea.key = false;
                     right = true;
                 }
-
-
 
                 //@shree - updating the blocks continuously
                 for (var i = 0; ((i < myBlocks.length) || !stop); i++) {
@@ -201,9 +215,9 @@ Group Members -
                         //@shree - if block is first block, and reaches bottom border, add to stopped list
 
                         if ((myBlocks[i].y === 220 && !stopBlocks.includes(i)) || (myBlocks[i].y === 220 && firstBlock)) {
+
                             stopBlocks.push(i);
                             level[0][cnt[0]] = i;
-                            //   window.alert(i + " added to level  0 at position : " + cnt[0]);
                             cnt[0]++;
 
                             //@shree - clearing the line if all full
@@ -227,15 +241,19 @@ Group Members -
                                     //@shree - clearing the line if all full
                                     clearLine(Math.abs((myBlocks[i].y / 20) - 11));
 
+                                    //@shree - check if we the block hit the top
                                     if (Math.abs((myBlocks[i].y / 20) - 11) === 11) {
                                         stop = true;
                                         newBlock = false;
+
                                     } else
                                         newBlock = true;
+
                                 } else {
                                     myBlocks[i].y += 1;
                                     clearLine(Math.abs((myBlocks[i].y / 20) - 11));
                                 }
+
                             } else {
                                 myBlocks[i].y += 1;
                             }
@@ -266,9 +284,10 @@ Group Members -
                 }
             }
 
+
             //@shree - allow block to move down, or is it hit by obstacle
             function allowDown(x, y, i) {
-                //    window.alert("y : " + y + ", check level : " + Math.abs((y / 20) - 10));
+
                 xmin = x;
                 xmax = x + blockList[i] * 20;
 
@@ -278,6 +297,7 @@ Group Members -
 
                         xtemp_min = myBlocks[level[Math.abs((y / 20) - 10)][a]].x;
                         xtemp_max = myBlocks[level[Math.abs((y / 20) - 10)][a]].x + (blockList[level[Math.abs((y / 20) - 10)][a]] * 20);
+
                         //@shree - check overlap condition
                         if (xmin < xtemp_min && xmax <= xtemp_min)
                         {
@@ -345,8 +365,6 @@ Group Members -
             }
 
 
-
-
             //@shree - check if we can clear the line, if yes, shift one block down
             function clearLine(lcnt) {
 
@@ -360,9 +378,7 @@ Group Members -
 
                     //@shree - initial logic to check clear condition
                     //for (a = 0; a < 9; a++) {
-
                     //if (level[lcnt][a] >= 0) {
-
                     //xtemp_min = myBlocks[level[lcnt][a]].x;
                     //xtemp_max = myBlocks[level[lcnt][a]].x + (blockList[level[lcnt][a]] * 20);
                     //if (xmin === xtemp_min) {
@@ -386,17 +402,16 @@ Group Members -
                             }
                         }
 
-                        //@shree - using sorting methods with the function inside it, to overcome JS alphabetical sort for numbers as well
+                        //@shree - using sorting methods with the function inside it, to overcome JS alphabetical sort for numbers
                         min.sort(function (a, b) {
                             return a - b
                         });
-
 
                         max.sort(function (a, b) {
                             return a - b
                         });
 
-
+                        //@shree - chcking if we can clear the line
                         for (a = 1; a < min.length; a++) {
 
                             if (min[0] === 0 && max[max.length - 1] === 180) {
@@ -414,9 +429,11 @@ Group Members -
                         }
                     }
 
+                    //@shree - clearing the line
                     if (clear) {
 
                         cnt[lcnt] = 0;
+                        
                         for (a = 0; a < 9; a++) {
                             if (level[lcnt][a] >= 0) {
                                 myBlocks[level[lcnt][a]].y = 2000;
@@ -452,9 +469,11 @@ Group Members -
                 left = true;
             }
 
+
             function moveright() {
                 right = true;
             }
+
 
             function clearmove() {
                 myGamePiece.speedX = 0;
@@ -463,18 +482,18 @@ Group Members -
 
         </script>
 
+        
 
         <div class = "wrap">
             <button onmousedown="moveleft()" onmouseup="clearmove()">LEFT</button>
             <button onmousedown="moveright()" onmouseup="clearmove()">RIGHT</button>
         </div>
+
         
-        
+
         <div align = "center">      
             <p>NOTE : Use the button to move block left or right. You can also use arrow keys for the same.<p>
         </div>
-
-
 
     </body>
 
