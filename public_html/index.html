@@ -64,12 +64,10 @@ Group Members -
 
             var myGamePiece;
             var myBlocks = [];
-
             var stopBlocks = [];
             var newBlock = false;
             var firstBlock = true;
             var blockList = [];
-
             var level = new Array(12);
             for (i = 0; i < 12; i++) {
                 level[i] = new Array(9);
@@ -80,13 +78,10 @@ Group Members -
             var cnt = new Array(12);
             for (i = 0; i < 12; i++)
                 cnt[i] = 0;
-
             var left = false;
             var right = false;
-
             var stop = false;
             var stop_cnt = 0;
-
             function startGame() {
                 myGameArea.start();
             }
@@ -170,6 +165,7 @@ Group Members -
                     left = true;
                 }
 
+                //@shree - moving blocks with arrow keys
                 if (myGameArea.key && myGameArea.key === 39) {
                     myGameArea.key = false;
                     right = true;
@@ -180,11 +176,9 @@ Group Members -
                 for (var i = 0; ((i < myBlocks.length) || !stop); i++) {
 
                     if (stop) {
-                        //window.alert("Game Over!! Reload page to start again.");
-                        newBlock = false
-                        
+                        newBlock = false;
                         //@shree - keep rendering all the blocks again
-                        myBlocks[i].update();;
+                        myBlocks[i].update();
                     } else {
 
                         //@shree - if block is not yet in the stopped list, add it to stopped list and set values for the next block, if not move current block downwards
@@ -193,7 +187,12 @@ Group Members -
                         if ((myBlocks[i].y === 220 && !stopBlocks.includes(i)) || (myBlocks[i].y === 220 && firstBlock)) {
                             stopBlocks.push(i);
                             level[0][cnt[0]] = i;
+                            //   window.alert(i + " added to level  0 at position : " + cnt[0]);
                             cnt[0]++;
+
+                            //@shree - clearing the line if all full
+                            clearLine(Math.abs((myBlocks[i].y / 20) - 11));
+
                             newBlock = true;
                             firstBlock = false;
                         }                                                                                           //@shree - if block is not stopped yet, then keep it in motion 
@@ -202,26 +201,35 @@ Group Members -
                             //@shree - move down, check obstacles
                             if ((myBlocks[i].y % 20) === 0) {
 
-                                if (allowDown(myBlocks[i].x, myBlocks[i].y, i))
+                                if (!(allowDown(myBlocks[i].x, myBlocks[i].y, i)))
                                 {
                                     //@shree - obstacle found, adding this block to stoplist raise new block
                                     stopBlocks.push(i);
                                     level[Math.abs((myBlocks[i].y / 20) - 11)][cnt[Math.abs((myBlocks[i].y / 20) - 11)]] = i;
+                                    //    window.alert(i + " added to level " + Math.abs((myBlocks[i].y / 20) - 11) + " at position : " + cnt[Math.abs((myBlocks[i].y / 20) - 11)]);
                                     cnt[Math.abs((myBlocks[i].y / 20) - 11)]++;
 
-                                    if (Math.abs((myBlocks[i].y / 20) - 11) === 11)
-                                        stop = true;
 
-                                    newBlock = true;
-                                } else
+
+                                    //@shree - clearing the line if all full
+                                    clearLine(Math.abs((myBlocks[i].y / 20) - 11));
+
+                                    if (Math.abs((myBlocks[i].y / 20) - 11) === 11) {
+                                        stop = true;
+                                        newBlock = false;
+                                    } else
+                                        newBlock = true;
+                                } else {
                                     myBlocks[i].y += 1;
+                                    clearLine(Math.abs((myBlocks[i].y / 20) - 11));
+                                }
                             } else {
                                 myBlocks[i].y += 1;
                             }
 
                             //@shree - move left
                             if (left) {
-                                if (!(myBlocks[i].x === 0))                                                    //@shree - check for left border
+                                if (!(myBlocks[i].x === 0))                                                            //@shree - check for left border
                                     myBlocks[i].x -= 20;
                                 left = false;
                             }
@@ -245,6 +253,7 @@ Group Members -
                 //    window.alert("y : " + y + ", check level : " + Math.abs((y / 20) - 10));
                 xmin = x;
                 xmax = x + blockList[i] * 20;
+
                 for (a = 0; a < 9; a++) {
 
                     if (level[Math.abs((y / 20) - 10)][a] >= 0) {
@@ -259,13 +268,13 @@ Group Members -
                         {
                             //@shree - do nothing
                         } else if (xmin < xtemp_min && xmax > xtemp_min)
-                            return true;
+                            return false;
                         else if (xmin >= xtemp_min && xmin <= xtemp_max)
-                            return true;
+                            return false;
                     }
                 }
 
-                return false;
+                return true;
             }
 
 
@@ -273,31 +282,129 @@ Group Members -
             function allowLeft(x, y, i) {
 
                 xmin = x;
-
-                window.alert("cnt : " + Math.abs((y / 20) - 11) + ", value : " + cnt[Math.abs((y / 20) - 11)]);
-
+                //  window.alert("cnt : " + Math.abs((y / 20) - 11) + ", value : " + cnt[Math.abs((y / 20) - 11)]);
                 if (!(cnt[Math.abs((y / 20) - 11)]) > 0)
                     return true;
-
-
-
                 for (a = 0; a < 9; a++) {
 
                     if (level[Math.abs((y / 20) - 11)][a] >= 0) {
 
-                        //xtemp_min = myBlocks[level[Math.abs((y / 20) - 11)][a]].x;
                         xtemp_max = myBlocks[level[Math.abs((y / 20) - 11)][a]].x + (blockList[level[Math.abs((y / 20) - 10)][a]] * 20);
-
-                        window.alert("xmin : " + xmin + ",  xtemp_max : " + xtemp_max);
-
+                        //window.alert("xmin : " + xmin + ",  xtemp_max : " + xtemp_max);
                         if (xmin === xtemp_max)
                             return false;
                     }
                     return true;
                 }
+            }
+
+
+            //@shree - check if we can clear the line, if yes, shift one block down
+            function clearLine(lcnt) {
+
+                var xmin = 0;
+                var clear = false;
+
+                var min = [];
+                var max = [];
+
+                if (cnt[lcnt] > 2) {                                                                                                   //@shree - checking only if we have atleast three blocks in a level
+
+                    //@shree - initial logic to check clear condition
+                    //for (a = 0; a < 9; a++) {
+
+                    //if (level[lcnt][a] >= 0) {
+
+                    //xtemp_min = myBlocks[level[lcnt][a]].x;
+                    //xtemp_max = myBlocks[level[lcnt][a]].x + (blockList[level[lcnt][a]] * 20);
+                    //if (xmin === xtemp_min) {
+                    //xmin = xtemp_max;
+                    //a = 0;
+                    //if (xmin === 180)
+                    //clear = true;
+                    //}
+                    //}
+                    //}
+
+                    //@shree - new logic to check clear condition
+                    if (!clear) {
+
+                        for (a = 0; a < 9; a++) {
+
+                            if (level[lcnt][a] >= 0) {
+
+                                min.push(myBlocks[level[lcnt][a]].x);
+                                max.push(myBlocks[level[lcnt][a]].x + (blockList[level[lcnt][a]] * 20));
+                            }
+                        }
+
+                        //@shree - using sorting methods with the funnction inside it, to overcome JS alphabetical sort for numbers asw ell
+                        min.sort(function (a, b) {
+                            return a - b
+                        });
 
 
 
+                        max.sort(function (a, b) {
+                            return a - b
+                        });
+
+                        window.alert("Min : " + min);
+                        window.alert("Max : " + max);
+
+                        for (a = 1; a < min.length; a++) {
+
+                            if (min[0] === 0 && max[max.length - 1] === 180) {
+
+                                if (min[a] === max[a - 1])
+                                    clear = true;
+                                else {
+                                    clear = false;
+                                    break;
+                                }
+                            } else {
+                                clear = false;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (clear) {
+                        window.alert("clearing now : " + lcnt);
+
+                        cnt[lcnt] = 0;
+                        for (a = 0; a < 9; a++) {
+                            if (level[lcnt][a] >= 0) {
+                                myBlocks[level[lcnt][a]].y = 2000;
+                            }
+                        }
+
+                        for (a = lcnt; a < 11; a++) {
+
+                            cnt[a] = 0;
+
+                            for (b = 0; b < 9; b++) {
+
+                                if (level[a + 1][b] >= 0) {
+
+                                    level[a][b] = level[a + 1][b];
+
+                                    myBlocks[level[a][b]].y += 20;
+                                    //    window.alert(level[a + 1][b] + " is added from level " + (a + 1) + " to level " + a + " at position : " + cnt[a]);
+                                    cnt[a]++;
+
+                                } else
+                                    level[a][b] = -1;
+                            }
+
+                            for (c = 0; c < 9; c++) {
+                                level[a + 1][c] = -1;
+                            }
+                        }
+
+
+                    }
+                }
             }
 
 
